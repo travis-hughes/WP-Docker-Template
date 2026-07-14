@@ -1,0 +1,54 @@
+services:
+  wordpress:
+    container_name: ${APP_NAME}_wordpress
+    image: wordpress:latest
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    networks:
+      - public
+      - private
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - wp:/var/www/html/
+      - wp:/var/www/html/wp-content/themes/default
+      - ./config/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+
+  mysql:
+    container_name: ${APP_NAME}_mysql
+    image: mysql:latest
+    restart: unless-stopped
+    networks:
+      - private
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - db:/var/lib/mysql
+
+
+
+networks:
+  public:
+    name: public-net
+    external: true
+
+  private:
+    name: ${APP_NAME}_net
+    external: false
+
+
+volumes:
+  wp:
+    name: ${APP_NAME}_wp
+    external: false
+  
+  db:
+    name: ${APP_NAME}_db
+    external: false
